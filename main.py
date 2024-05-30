@@ -2,11 +2,13 @@ import pygame
 from sys import exit
 import setup
 import elements
+import population
 
 BLACK_COLOR = (0, 0 ,0)
 
 pygame.init()
 clock = pygame.time.Clock()
+population = population.Population(10)
 
 def generate_obstacle():
     setup.obstacles.append(elements.Obstacles(setup.window_width))
@@ -25,7 +27,7 @@ def main():
         
         if ticks_until_obstacle_spawn <= 0:
             generate_obstacle()
-            ticks_until_obstacle_spawn = 175
+            ticks_until_obstacle_spawn = 180
         ticks_until_obstacle_spawn -= 1
 
         for obstacle in setup.obstacles:
@@ -33,6 +35,8 @@ def main():
             obstacle.move()
             if obstacle.off_screen:
                 setup.obstacles.remove(obstacle)
+        
+        population.update_birds()
 
         clock.tick(60)
         pygame.display.flip()
