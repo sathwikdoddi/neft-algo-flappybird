@@ -36,7 +36,8 @@ def main():
             if obstacle.off_screen:
                 setup.obstacles.remove(obstacle)
         
-        population.update_birds()
+        if not population.extinct():
+            population.update_birds()
 
         clock.tick(60)
         pygame.display.flip()

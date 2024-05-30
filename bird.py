@@ -1,6 +1,7 @@
 import pygame
 import random
 import setup
+import brain
 
 class Bird:
     def __init__(self):
@@ -14,6 +15,10 @@ class Bird:
         self.alive = True
 
         self.network_decision = None
+        self.data = [0.5, 1, 0.5]
+        self.inputs = 3
+        self.brain = brain.Brain(self.inputs)
+        self.brain.generate_network()
     
     def draw_player(self, window):
         pygame.draw.rect(window, self.color, self.bird)
@@ -45,6 +50,23 @@ class Bird:
             self.flap = False
     
     def random_flapping(self):
-        self.network_decision = random.uniform(0, 1)
-        if self.network_decision > 0.70:
+        self.network_decision = self.brain.feed_inputs(self.data)
+        if self.network_decision > 0.73:
             self.bird_flapping()
+
+    def get_data(self):
+        if setup.obstacles:
+            self.data[0] = max(0, self.bird.center[1] - self.closest_pipe().top_component.bottom) / 400
+            pygame.draw.line(setup.window, self.color, self.bird.center, (self.bird.center[0], self.closest_pipe().top_component.bottom))
+
+            self.data[1] = max(0, self.closest_pipe().x - self.bird.center[0]) / 400
+            pygame.draw.line(setup.window, self.color, self.bird.center, (self.closest_pipe().x, self.bird.center[1]))
+
+            self.data[2] = max(0, self.closest_pipe().bottom_component.top - self.bird.center[1]) / 400
+            pygame.draw.line(setup.window, self.color, self.bird.center, (self.bird.center[0], self.closest_pipe().bottom_component.top))
+            
+    @staticmethod
+    def closest_pipe():
+        for obstacle in setup.obstacles:
+            if not obstacle.passed:
+                return obstacle
