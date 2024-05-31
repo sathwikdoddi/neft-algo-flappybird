@@ -1,43 +1,46 @@
 import pygame
 from sys import exit
-import setup
-import elements
+import config
+import components
 import population
 
-BLACK_COLOR = (0, 0 ,0)
+COLOR_BLACK = (0, 0, 0)
 
 pygame.init()
 clock = pygame.time.Clock()
-population = population.Population(10)
+population = population.Population(100)
 
-def generate_obstacle():
-    setup.obstacles.append(elements.Obstacles(setup.window_width))
+def generate_pipes():
+    config.pipes.append(components.Pipes(config.win_width))
 
 def main():
-    ticks_until_obstacle_spawn = 10
+    pipes_spawn_time = 10
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        
-        setup.window.fill(BLACK_COLOR)
-        setup.ground.draw_ground(setup.window)
-        
-        if ticks_until_obstacle_spawn <= 0:
-            generate_obstacle()
-            ticks_until_obstacle_spawn = 180
-        ticks_until_obstacle_spawn -= 1
 
-        for obstacle in setup.obstacles:
-            obstacle.draw_obstacles(setup.window)
-            obstacle.move()
-            if obstacle.off_screen:
-                setup.obstacles.remove(obstacle)
-        
+        config.window.fill(COLOR_BLACK)
+        config.ground.draw(config.window)
+
+        if pipes_spawn_time <= 0:
+            generate_pipes()
+            pipes_spawn_time = 200
+        pipes_spawn_time -= 1
+
+        for p in config.pipes:
+            p.draw(config.window)
+            p.update()
+            if p.off_screen:
+                config.pipes.remove(p)
+
         if not population.extinct():
-            population.update_birds()
+            population.update_live_players()
+        else:
+            config.pipes.clear()
+            population.natural_selection()
 
         clock.tick(60)
         pygame.display.flip()
